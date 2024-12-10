@@ -34,6 +34,16 @@ namespace MyContacts.Model
         {
             return contacts.FirstOrDefault( c => c.Id==id ) ;
         }
+        public void UpdateContact(ContactInfo contact)
+{
+    var existingContact = contacts.FirstOrDefault(c => c.Id == contact.Id);
+    if (existingContact != null)
+    {
+        existingContact.NameSurname = contact.NameSurname;
+        existingContact.PhoneNumber = contact.PhoneNumber;
+        existingContact.Email = contact.Email;
+    }
+}
 
     }
 }
