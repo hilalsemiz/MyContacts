@@ -3,6 +3,15 @@ using MyContacts.Model;
 
 namespace MyContacts.Views;
 
+private void ContactsList_ItemSelected(object sender, SelectedItemChangedEventArgs e)
+{
+    var selectedContact = e.SelectedItem as ContactInfo;
+    if (selectedContact != null)
+    {
+        Shell.Current.GoToAsync(nameof(EditContactPage) + "?id=" + selectedContact.Id);  // Seçilen kişiyi düzenlemeye git
+    }
+}
+
 public partial class ContactsPage : ContentPage
 {
     
