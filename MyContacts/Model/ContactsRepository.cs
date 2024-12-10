@@ -44,6 +44,40 @@ namespace MyContacts.Model
         existingContact.Email = contact.Email;
     }
 }
+        private List<ContactInfo> contacts;
+
+        public ContactRepository()
+        {
+        
+            contacts = new List<ContactInfo>
+            {
+                new ContactInfo { Id = 1, NameSurname = "Ali Yılmaz", PhoneNumber = "1234567890", Email = "ali@example.com" },
+                new ContactInfo { Id = 2, NameSurname = "Ayşe Demir", PhoneNumber = "9876543210", Email = "ayse@example.com" }
+            };
+        }
+
+
+        public List<ContactInfo> GetContacts()
+        {
+            return contacts;
+        }
+
+    
+        public ContactInfo GetContact(int id)
+        {
+            return contacts.FirstOrDefault(c => c.Id == id);
+        }
+
+        public void UpdateContact(ContactInfo contact)
+        {
+            var existingContact = contacts.FirstOrDefault(c => c.Id == contact.Id);
+            if (existingContact != null)
+            {
+                existingContact.NameSurname = contact.NameSurname;
+                existingContact.PhoneNumber = contact.PhoneNumber;
+                existingContact.Email = contact.Email;
+            }
+        }
 
     }
 }
