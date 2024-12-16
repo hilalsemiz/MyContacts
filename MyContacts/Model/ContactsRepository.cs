@@ -1,83 +1,59 @@
-﻿using System;
-using System.Collections.Generic;
+using Microsoft.Data.Sqlite;
 using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MyContacts.Model
 {
     public class ContactsRepository
     {
-         static List<ContactInfo> contacts = new List<ContactInfo>() { 
-                    new ContactInfo {Id=1, NameSurname="Hüseyin Şimşek", Email="huseyinsimsek@gmail", PhoneNumber="053357252"}
-                    };
-        static int maxId = 2;
-        public ContactsRepository()
+        private const string connectionString = "Data Source=contacts.db;";
+
+    
+        public ObservableCollection<ContactInfo> GetContacts()
         {
-            
-        }
+            var contacts = new ObservableCollection<ContactInfo>();
 
-        public ObservableCollection<ContactInfo> GetContacts() {
-            return new ObservableCollection<ContactInfo>( contacts);
-
-        }
-
-        public void AddContact(ContactInfo contact)
-        {
-            contact.Id = maxId++;
-            contacts.Add(contact);
-        }
-
-        public ContactInfo GetContact(int id)
-        {
-            return contacts.FirstOrDefault( c => c.Id==id ) ;
-        }
-        public void UpdateContact(ContactInfo contact)
-{
-    var existingContact = contacts.FirstOrDefault(c => c.Id == contact.Id);
-    if (existingContact != null)
-    {
-        existingContact.NameSurname = contact.NameSurname;
-        existingContact.PhoneNumber = contact.PhoneNumber;
-        existingContact.Email = contact.Email;
-    }
-}
-        private List<ContactInfo> contacts;
-
-        public ContactRepository()
-        {
-        
-            contacts = new List<ContactInfo>
+            using (var connection = new SqliteConnection(connectionString))
             {
-                new ContactInfo { Id = 1, NameSurname = "Ali Yılmaz", PhoneNumber = "1234567890", Email = "ali@example.com" },
-                new ContactInfo { Id = 2, NameSurname = "Ayşe Demir", PhoneNumber = "9876543210", Email = "ayse@example.com" }
-            };
-        }
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = "SELECT Id, NameSurname, PhoneNumber, Email FROM Contacts;";
 
-
-        public List<ContactInfo> GetContacts()
-        {
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        contacts.Add(new ContactInfo
+                        {
+                            Id = reader.GetInt32(0),
+                            NameSurname = reader.GetString(1),
+                            PhoneNumber = reader.GetString(2),
+                            Email = reader.GetString(3)
+                        });
+                    }
+                }
+            }
             return contacts;
         }
 
     
-        public ContactInfo GetContact(int id)
-        {
-            return contacts.FirstOrDefault(c => c.Id == id);
-        }
-
         public void UpdateContact(ContactInfo contact)
         {
-            var existingContact = contacts.FirstOrDefault(c => c.Id == contact.Id);
-            if (existingContact != null)
+            using (var connection = new SqliteConnection(connectionString))
             {
-                existingContact.NameSurname = contact.NameSurname;
-                existingContact.PhoneNumber = contact.PhoneNumber;
-                existingContact.Email = contact.Email;
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = @"
+                    UPDATE Contacts 
+                    SET NameSurname = @name, PhoneNumber = @phone, Email = @Email 
+                    WHERE Id = @id;";
+
+                command.Parameters.AddWithValue("@id", contact.Id);
+                command.Parameters.AddWithValue("@name", contact.NameSurname);
+                command.Parameters.AddWithValue("@phone", contact.PhoneNumber);
+                command.Parameters.AddWithValue("@Email", contact.Email);
+
+                command.ExecuteNonQuery();
             }
         }
-
     }
 }
